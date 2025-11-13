@@ -22,7 +22,15 @@ const renderPost = (post: Post) => (
 );
 
 export const Feed: React.FC = () => {
-  const { data, status, refetch, isFetching } = useInfiniteFeed();
+  const {
+    data,
+    status,
+    refetch,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteFeed();
 
   const posts = data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -58,6 +66,17 @@ export const Feed: React.FC = () => {
           <p className="feed-small">No posts yet. (We&apos;re still using a mocked repository page.)</p>
         )}
       </div>
+      {status === 'success' && hasNextPage && (
+        <div className="feed-controls" style={{ marginTop: '0.75rem' }}>
+          <button
+            className="feed-button"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading more…' : 'Load more'}
+          </button>
+        </div>
+      )}
     </section>
   );
 };

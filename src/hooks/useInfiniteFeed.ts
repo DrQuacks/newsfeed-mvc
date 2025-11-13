@@ -7,17 +7,28 @@ import type { FeedCursor, FeedPage } from '@/models/post';
 
 const FEED_QUERY_KEY = ['feed'] as const;
 
+// export function useInfiniteFeed() {
+//   return useInfiniteQuery<
+//     FeedPage,              // TData
+//     Error,                 // TError
+//     FeedPage,              // TQueryFnData
+//     typeof FEED_QUERY_KEY, // TQueryKey
+//     FeedCursor | undefined // TPageParam
+//   >({
+//     queryKey: FEED_QUERY_KEY,
+//     queryFn: ({ pageParam }) => postRepo.getFeedPage(pageParam),
+//     initialPageParam: undefined,
+//     getNextPageParam: (lastPage) => lastPage.nextCursor,
+//   });
+// }
+
 export function useInfiniteFeed() {
-  return useInfiniteQuery<
-    FeedPage,              // TData
-    Error,                 // TError
-    FeedPage,              // TQueryFnData
-    typeof FEED_QUERY_KEY, // TQueryKey
-    FeedCursor | undefined // TPageParam
-  >({
+  return useInfiniteQuery({
     queryKey: FEED_QUERY_KEY,
-    queryFn: ({ pageParam }) => postRepo.getFeedPage(pageParam),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    // queryFn returns a Promise<FeedPage>
+    queryFn: ({ pageParam }: { pageParam?: FeedCursor }) =>
+      postRepo.getFeedPage(pageParam),
+    initialPageParam: undefined as FeedCursor | undefined,
+    getNextPageParam: (lastPage: FeedPage) => lastPage.nextCursor,
   });
 }
