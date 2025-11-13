@@ -9,8 +9,14 @@ export type Post = {
   createdAt: string; // ISO timestamp
 };
 
+// Cursor for pagination: uniquely identifies a position in the feed.
+export type FeedCursor = {
+  createdAt: string;
+  id: string;
+};
+
 export type FeedPage = {
   items: Post[];
   // For now we omit cursor details. We'll extend this in later milestones.
-  nextCursor?: unknown;
+  nextCursor?: FeedCursor;
 };
