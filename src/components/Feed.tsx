@@ -2,6 +2,8 @@
 import React from 'react';
 import { useInfiniteFeed } from '@/hooks/useInfiniteFeed';
 import type { Post } from '@/models/post';
+import { useUIStore } from '@/stores/uiStore';
+import { Toolbar } from './Toolbar';
 
 // View: now consumes the Controller hook (useInfiniteFeed)
 // instead of calling the repository directly.
@@ -22,6 +24,7 @@ const renderPost = (post: Post) => (
 );
 
 export const Feed: React.FC = () => {
+  const feedFilter = useUIStore((s) => s.feedFilter);
   const {
     data,
     status,
@@ -30,7 +33,7 @@ export const Feed: React.FC = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteFeed();
+  } = useInfiniteFeed(feedFilter);
 
   const posts = data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -38,10 +41,12 @@ export const Feed: React.FC = () => {
     <section className="feed-card">
       <h2>Newsfeed</h2>
       <p className="feed-small">
-        Milestones 4–5: The View now talks to a <strong>Controller hook</strong> which talks to a{' '}
-        <strong>repository</strong> and a <strong>query cache</strong> (Model). This mirrors a frontend system design
-        where the UI never calls the API directly.
+        Milestones 7–8: We now have a <strong>UI store</strong> for the filter and the query cache is{' '}
+        <strong>keyed by filter</strong>. The View talks to a <strong>Controller hook</strong>, which calls a{' '}
+        <strong>repository</strong> backed by a real HTTP API.
       </p>
+      
+      <Toolbar />
 
       <div className="feed-controls">
         <button className="feed-button" onClick={() => refetch()} disabled={isFetching}>
