@@ -11,7 +11,7 @@ export function useInfiniteFeed(filter: FeedFilter) {
     queryKey: ['feed', filter],
     // queryFn returns a Promise<FeedPage>
     queryFn: ({ pageParam }: { pageParam?: FeedCursor }) =>
-      postRepo.getFeedPage(pageParam),
+      postRepo.getFeedPage(filter,pageParam),
     initialPageParam: undefined as FeedCursor | undefined,
     getNextPageParam: (lastPage: FeedPage) => lastPage.nextCursor,
   });

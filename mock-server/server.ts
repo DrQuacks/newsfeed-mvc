@@ -33,15 +33,20 @@ function sortPostsDesc(list) {
 app.get('/api/feed', (req, res) => {
   const PAGE_SIZE = 10;
   const cursorParam = req.query.cursor;
+  const filter = req.query.filter || 'all';
 
-  const sorted = sortPostsDesc(posts);
+  let filtered = sortPostsDesc(posts);
+  if (filter === 'mine') {
+    // Pretend authorId 'u1' is the “current user”
+    filtered = filtered.filter((p) => p.authorId === 'u1');
+  }
 
   let startIndex = 0;
 
   if (cursorParam) {
     try {
       const cursor = JSON.parse(cursorParam);
-      const idx = sorted.findIndex(
+      const idx = filtered.findIndex(
         (p) => p.createdAt === cursor.createdAt && p.id === cursor.id
       );
       if (idx >= 0) {
@@ -52,7 +57,7 @@ app.get('/api/feed', (req, res) => {
     }
   }
 
-  const pageItems = sorted.slice(startIndex, startIndex + PAGE_SIZE);
+  const pageItems = filtered.slice(startIndex, startIndex + PAGE_SIZE);
   const last = pageItems[pageItems.length - 1];
 
   const nextCursor =
