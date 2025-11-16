@@ -4,6 +4,7 @@ import { useInfiniteFeed } from '@/hooks/useInfiniteFeed';
 import type { Post } from '@/models/post';
 import { useUIStore } from '@/stores/uiStore';
 import { Toolbar } from './Toolbar';
+import { useLiveUpdates } from '@/hooks/useLiveUpdates';
 
 // View: now consumes the Controller hook (useInfiniteFeed)
 // instead of calling the repository directly.
@@ -25,6 +26,7 @@ const renderPost = (post: Post) => (
 
 export const Feed: React.FC = () => {
   const feedFilter = useUIStore((s) => s.feedFilter);
+  useLiveUpdates();
   const {
     data,
     status,
@@ -45,7 +47,7 @@ export const Feed: React.FC = () => {
         <strong>keyed by filter</strong>. The View talks to a <strong>Controller hook</strong>, which calls a{' '}
         <strong>repository</strong> backed by a real HTTP API.
       </p>
-      
+
       <Toolbar />
 
       <div className="feed-controls">
