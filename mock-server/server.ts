@@ -36,40 +36,22 @@ app.get('/api/feed', (req, res) => {
   const cursorParam = req.query.cursor;
   const filter = req.query.filter || 'all';
 
-  let filtered = sortPostsDesc(posts);
-  if (filter === 'mine') {
-    // Pretend authorId 'u1' is the “current user”
-    filtered = filtered.filter((p) => p.authorId === 'u1');
-  }
-
-  let startIndex = 0;
-
+  let cursor;
   if (cursorParam) {
     try {
-      const cursor = JSON.parse(cursorParam);
-      const idx = filtered.findIndex(
-        (p) => p.createdAt === cursor.createdAt && p.id === cursor.id
-      );
-      if (idx >= 0) {
-        startIndex = idx + 1;
-      }
+      cursor = JSON.parse(cursorParam);
     } catch {
-      // If cursor is invalid, we'll just start at 0 (like first page).
+      // ignore bad cursor, treat as first page
     }
   }
 
-  const pageItems = filtered.slice(startIndex, startIndex + PAGE_SIZE);
-  const last = pageItems[pageItems.length - 1];
-
-  const nextCursor =
-    pageItems.length === PAGE_SIZE && last
-      ? { createdAt: last.createdAt, id: last.id }
-      : undefined;
-
-  res.json({
-    items: pageItems,
-    nextCursor,
+  const page = getFeedPage({
+    filter,
+    cursor,
+    pageSize: PAGE_SIZE,
   });
+
+  res.json(page);
 });
 
 const PORT = 3000;
