@@ -1,10 +1,9 @@
-// mock-server/db.js
+// mock-server/db.ts
 // Model: SQLite database and basic data access for posts.
 
-const Database = require('better-sqlite3');
-const path = require('path');
+import Database from 'better-sqlite3';
+import path from 'path';
 
-// Store the DB file in the mock-server folder
 const dbPath = path.join(__dirname, 'newsfeed.db');
 const db = new Database(dbPath);
 
@@ -54,7 +53,7 @@ function seedIfEmpty() {
     };
   });
 
-  const insertMany = db.transaction((rows) => {
+  const insertMany = db.transaction((rows: any[]) => {
     for (const row of rows) {
       insert.run(row);
     }
@@ -65,23 +64,42 @@ function seedIfEmpty() {
 
 seedIfEmpty();
 
-// Data access helpers
+export type FeedPageFromDb = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+};
 
-function getFeedPage({ filter, cursor, pageSize }) {
-  // filter: 'all' | 'mine'
-  // cursor: { createdAt, id } | undefined
+export type FeedCursor = {
+  createdAt: string;
+  id: string;
+};
 
-  const params:string[] = [];
+export type FeedPageResult = {
+  items: FeedPageFromDb[];
+  nextCursor?: FeedCursor;
+};
+
+// This is the ONLY getFeedPage we want to export from this module
+export function getFeedPage(options: {
+  filter: 'all' | 'mine';
+  cursor?: FeedCursor;
+  pageSize: number;
+}): FeedPageResult {
+  const { filter, cursor, pageSize } = options;
+
+  const params: any[] = [];
   let whereClause = '';
   let cursorClause = '';
 
   if (filter === 'mine') {
     whereClause = 'WHERE authorId = ?';
-    params.push('u1'); // pretend u1 is "me"
+    params.push('u1'); // pretend u1 is current user
   }
 
   if (cursor) {
-    // Paginate on (createdAt DESC, id DESC)
     cursorClause += whereClause ? ' AND ' : 'WHERE ';
     cursorClause += '(createdAt < ? OR (createdAt = ? AND id < ?))';
     params.push(cursor.createdAt, cursor.createdAt, cursor.id);
@@ -98,9 +116,9 @@ function getFeedPage({ filter, cursor, pageSize }) {
 
   params.push(pageSize);
 
-  const items = db.prepare(sql).all(...params);
+  const items = db.prepare(sql).all(...params) as FeedPageFromDb[];
 
-  let nextCursor;
+  let nextCursor: FeedCursor | undefined;
   if (items.length === pageSize) {
     const last = items[items.length - 1];
     nextCursor = { createdAt: last.createdAt, id: last.id };
@@ -108,7 +126,3 @@ function getFeedPage({ filter, cursor, pageSize }) {
 
   return { items, nextCursor };
 }
-
-module.exports = {
-  getFeedPage,
-};

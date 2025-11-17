@@ -1,8 +1,9 @@
 // mock-server/server.js
 // Simple mock REST API with cursor-based pagination for the newsfeed.
 
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+import { getFeedPage } from './db';
 
 const app = express();
 app.use(cors());
