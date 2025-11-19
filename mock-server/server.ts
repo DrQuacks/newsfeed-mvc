@@ -3,7 +3,7 @@
 
 import express from 'express';
 import cors from 'cors';
-import { getFeedPage } from './db';
+import { getFeedPage, createPost } from './db';
 
 const app = express();
 app.use(cors());

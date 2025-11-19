@@ -126,3 +126,31 @@ export function getFeedPage(options: {
 
   return { items, nextCursor };
 }
+
+export type NewPostInput = {
+    authorId: string;
+    authorName: string;
+    body: string;
+};
+  
+export function createPost(input: NewPostInput): FeedPageFromDb {
+    const insert = db.prepare(`
+      INSERT INTO posts (id, authorId, authorName, body, createdAt)
+      VALUES (@id, @authorId, @authorName, @body, @createdAt)
+    `);
+  
+    const now = new Date();
+    const id = String(now.getTime()); // simple unique-ish id for demo
+  
+    const row: FeedPageFromDb = {
+      id,
+      authorId: input.authorId,
+      authorName: input.authorName,
+      body: input.body,
+      createdAt: now.toISOString(),
+    };
+  
+    insert.run(row);
+  
+    return row;
+}
